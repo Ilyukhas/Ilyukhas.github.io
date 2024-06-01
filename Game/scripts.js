@@ -5,18 +5,104 @@ document.addEventListener("DOMContentLoaded", function () {
     const volumeSlider = document.getElementById("volume");
     const transitionsCheckbox = document.getElementById("transitions");
     const sizeSelector = document.getElementById("size");
+    const blockColorPicker = document.getElementById("block-color");
     const gradient1Picker = document.getElementById("gradient1");
     const gradient2Picker = document.getElementById("gradient2");
     const boardGradient1Picker = document.getElementById("board-gradient1");
     const boardGradient2Picker = document.getElementById("board-gradient2");
-    const music = document.getElementById("background-music");
-    const restartGameBtn = document.querySelectorAll(".restart-game");
+    const resetSettingsBtn = document.getElementById("reset-settings");
+    const soundOnBtn = document.getElementById("sound-on-btn");
+    const soundOffBtn = document.getElementById("sound-off-btn");
+    const backgroundMusic = document.getElementById("background-music");
+    const moveSound = document.getElementById("move-sound");
+    const gameBoard = document.getElementById("game-board");
+    const movesCountElem = document.getElementById("moves-count");
     const winModal = document.getElementById("win-modal");
     const closeWinModal = document.getElementById("close-win-modal");
 
-    restartGameBtn.forEach(button => button.addEventListener("click", () => {
-        document.location.reload();
-    }));
+    let movesCount = 0;
+    let size = 4;
+    let blockColor = blockColorPicker.value;
+    let soundEnabled = true;
+
+    function initGame() {
+        generateGameBoard(size);
+        movesCount = 0;
+        updateMovesCount();
+        modal.style.display = "none";
+        winModal.style.display = "none";
+    }
+
+    function generateGameBoard(size) {
+        gameBoard.innerHTML = "";
+        gameBoard.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+        gameBoard.style.gridTemplateRows = `repeat(${size}, 1fr)`;
+
+        let numbers = [...Array(size * size).keys()].slice(1);
+        numbers.sort(() => Math.random() - 0.5);
+        numbers.push(0);
+
+        numbers.forEach(number => {
+            const block = document.createElement("div");
+            if (number !== 0) {
+                block.className = "rect_block"
+                block.textContent = number;
+                block.style.background = blockColor;
+                block.addEventListener("click", () => moveBlock(block));
+            }
+            else {
+                block.classList.add("empty");
+            }
+            gameBoard.appendChild(block);
+        });
+    }
+
+    function moveBlock(block) {
+        const emptyBlock = document.querySelector(".empty");
+        const emptyIndex = Array.from(gameBoard.children).indexOf(emptyBlock);
+        const blockIndex = Array.from(gameBoard.children).indexOf(block);
+
+        const [emptyRow, emptyCol] = [Math.floor(emptyIndex / size), emptyIndex % size];
+        const [blockRow, blockCol] = [Math.floor(blockIndex / size), blockIndex % size];
+
+        const isAdjacent =
+            (Math.abs(emptyRow - blockRow) === 1 && emptyCol === blockCol) ||
+            (Math.abs(emptyCol - blockCol) === 1 && emptyRow === blockRow);
+
+        if (isAdjacent) {
+            // Заменить пустой блок на выбранный блок и наоборот
+            const temp = document.createElement("div");
+            gameBoard.replaceChild(temp, block);
+            gameBoard.replaceChild(block, emptyBlock);
+            gameBoard.replaceChild(emptyBlock, temp);
+
+            movesCount++;
+            updateMovesCount();
+
+            if (soundEnabled) {
+                moveSound.currentTime = 0; // Обнуляем время звука, чтобы он не прерывался при быстром нажатии
+                moveSound.play();
+            }
+
+            if (checkWin()) {
+                setTimeout(() => {
+                    winModal.style.display = "block";
+                }, 300);
+            }
+        }
+    }
+
+    function updateMovesCount() {
+        movesCountElem.textContent = `Количество ходов: ${movesCount}`;
+    }
+
+    function checkWin() {
+        const blocks = Array.from(gameBoard.children);
+        return blocks.every((block, index) => {
+            const number = parseInt(block.textContent);
+            return block.classList.contains("empty") ? true : number === index + 1;
+        });
+    }
 
     settingsBtn.addEventListener("click", () => {
         modal.style.display = "block";
@@ -26,178 +112,93 @@ document.addEventListener("DOMContentLoaded", function () {
         modal.style.display = "none";
     });
 
-    window.addEventListener("click", (event) => {
-        if (event.target === modal) {
-            modal.style.display = "none";
-        }
-    });
-
-    volumeSlider.addEventListener("input", (e) => {
-        music.volume = e.target.value / 100;
-    });
-
-    transitionsCheckbox.addEventListener("change", (e) => {
-        const blocks = document.querySelectorAll(".rect_block");
-        blocks.forEach(block => {
-            block.style.transition = e.target.checked ? "0.5s" : "none";
-        });
-    });
-
-    sizeSelector.addEventListener("change", (e) => {
-        generateBoard(parseInt(e.target.value));
-    });
-
-    gradient1Picker.addEventListener("input", updateBackground);
-    gradient2Picker.addEventListener("input", updateBackground);
-    boardGradient1Picker.addEventListener("input", updateBoardBackground);
-    boardGradient2Picker.addEventListener("input", updateBoardBackground);
-
-    function updateBackground() {
-        document.body.style.background = `linear-gradient(65deg, ${gradient1Picker.value}, ${gradient2Picker.value})`;
-    }
-
-    function updateBoardBackground() {
-        const gameBoard = document.getElementById("game-board");
-        gameBoard.style.background = `linear-gradient(65deg, ${boardGradient1Picker.value}, ${boardGradient2Picker.value})`;
-    }
-
-    music.play();
-    restartGameBtn.forEach(button => button.addEventListener("click", () => {
-        winModal.style.display = "none";
-        generateBoard(parseInt(sizeSelector.value));
-    }));
-
     closeWinModal.addEventListener("click", () => {
         winModal.style.display = "none";
     });
 
-    generateBoard(4); // Initialize with default 4x4 grid
+    soundOnBtn.addEventListener("click", () => {
+        soundEnabled = false;
+        backgroundMusic.pause();
+        soundOnBtn.style.display = "none";
+        soundOffBtn.style.display = "inline";
+    });
+
+    soundOffBtn.addEventListener("click", () => {
+        soundEnabled = true;
+        backgroundMusic.play();
+        soundOnBtn.style.display = "inline";
+        soundOffBtn.style.display = "none";
+    });
+
+    volumeSlider.addEventListener("input", () => {
+        backgroundMusic.volume = volumeSlider.value / 100;
+    });
+
+    transitionsCheckbox.addEventListener("change", () => {
+        const blocks = document.querySelectorAll(".rect_block");
+        blocks.forEach(block => {
+            block.style.transition = transitionsCheckbox.checked ? "left 0.5s, top 0.5s" : "none";
+        });
+    });
+
+    sizeSelector.addEventListener("change", () => {
+        size = parseInt(sizeSelector.value);
+        initGame();
+    });
+
+    blockColorPicker.addEventListener("input", () => {
+        blockColor = blockColorPicker.value;
+        const blocks = document.querySelectorAll(".rect_block:not(.empty)");
+        blocks.forEach(block => {
+            block.style.backgroundColor = blockColor;
+        });
+    });
+
+    gradient1Picker.addEventListener("input", () => {
+        document.body.style.background = `linear-gradient(65deg, ${gradient1Picker.value}, ${gradient2Picker.value})`;
+    });
+
+    gradient2Picker.addEventListener("input", () => {
+        document.body.style.background = `linear-gradient(65deg, ${gradient1Picker.value}, ${gradient2Picker.value})`;
+    });
+
+    boardGradient1Picker.addEventListener("input", () => {
+        gameBoard.style.background = `linear-gradient(65deg, ${boardGradient1Picker.value}, ${boardGradient2Picker.value})`;
+    });
+
+    boardGradient2Picker.addEventListener("input", () => {
+        gameBoard.style.background = `linear-gradient(65deg, ${boardGradient1Picker.value}, ${boardGradient2Picker.value})`;
+    });
+
+    resetSettingsBtn.addEventListener("click", () => {
+        volumeSlider.value = 50;
+        backgroundMusic.volume = 0.5;
+        transitionsCheckbox.checked = true;
+        sizeSelector.value = 4;
+        blockColorPicker.value = "#87CEFA";
+        gradient1Picker.value = "#f4511e";
+        gradient2Picker.value = "#511ff4";
+        boardGradient1Picker.value = "#0a365e";
+        boardGradient2Picker.value = "#863a8b";
+        document.body.style.background = `linear-gradient(65deg, ${gradient1Picker.value}, ${gradient2Picker.value})`;
+        gameBoard.style.background = `linear-gradient(65deg, ${boardGradient1Picker.value}, ${boardGradient2Picker.value})`;
+        blockColor = blockColorPicker.value;
+        const blocks = document.querySelectorAll(".rect_block:not(.empty)");
+        blocks.forEach(block => {
+            block.style.backgroundColor = blockColor;
+        });
+        initGame();
+    });
+
+    const restartButtons = document.querySelectorAll(".restart-game");
+    restartButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            initGame();
+        });
+    });
+
+    backgroundMusic.volume = 0.5;
+    backgroundMusic.play();
+
+    initGame();
 });
-
-let final = false;
-let moves;
-let label_moves;
-let index = 105;
-let w, h;
-let field = [];
-let region = [];
-
-function generateBoard(size) {
-    moves = 0;
-    label_moves = document.getElementById("moves-count");
-    label_moves.innerHTML = "Количество ходов: 0";
-
-    w = h = size;
-    index = 420 / size; //Размер блока в зависимости от размера сетки
-
-    region = new Array(h).fill(null).map(() => new Array(w).fill(0));
-
-    //Инициализация доски с помощью последовательных номеров и нуля
-    let number = 1;
-    for (let i = 0; i < h; i++) {
-        for (let j = 0; j < w; j++) {
-            if (number < size * size) {
-                region[i][j] = number++;
-            }
-        }
-    }
-    region[h - 1][w - 1] = 0; // Пустое пространство
-
-    shuffleBoard(region);
-
-    const gameBoard = document.getElementById("game-board");
-    gameBoard.innerHTML = ""; // Clear the board
-    gameBoard.style.gridTemplateColumns = `repeat(${w}, ${index}px)`;
-    gameBoard.style.gridTemplateRows = `repeat(${h}, ${index}px)`;
-
-    field = [];
-    let k = 0;
-    for (let i = 0; i < h; i++) {
-        for (let j = 0; j < w; j++) {
-            if (region[i][j] !== 0) {
-                const block = document.createElement('div');
-                block.classList.add('rect_block');
-                block.dataset.blockId = k;
-                block.textContent = region[i][j];
-                block.style.left = `${20 + index * j}px`;
-                block.style.top = `${20 + index * i}px`;
-                gameBoard.appendChild(block);
-                field[k] = { ix: j, iy: i, block };
-                k++;
-            }
-        }
-    }
-
-    const blocks = document.getElementsByClassName("rect_block");
-    for (const block of blocks) {
-        block.style.width = `${index - 10}px`; // Настройка ширины
-        block.style.height = `${index - 10}px`; // Регулировка высоты
-        block.addEventListener("click", function () { moveBlock(this); });
-    }
-}
-
-function shuffleBoard(region) {
-    for (let i = h - 1; i > 0; i--) {
-        for (let j = w - 1; j > 0; j--) {
-            let i1 = Math.floor(Math.random() * (i + 1));
-            let j1 = Math.floor(Math.random() * (j + 1));
-            [region[i][j], region[i1][j1]] = [region[i1][j1], region[i][j]];
-        }
-    }
-}
-
-function moveBlock(element) {
-    if (final) {
-        return;
-    }
-
-    const blockId = element.dataset.blockId;
-    const object = field[blockId];
-    const ix = object.ix;
-    const iy = object.iy;
-
-    if (iy + 1 < h && region[iy + 1][ix] == 0) {
-        swapBlocks(object, ix, iy, ix, iy + 1);
-    }
-    else if (iy - 1 > -1 && region[iy - 1][ix] == 0) {
-        swapBlocks(object, ix, iy, ix, iy - 1);
-    }
-    else if (ix + 1 < w && region[iy][ix + 1] == 0) {
-        swapBlocks(object, ix, iy, ix + 1, iy);
-    }
-    else if (ix - 1 > -1 && region[iy][ix - 1] == 0) {
-        swapBlocks(object, ix, iy, ix - 1, iy);
-    }
-
-    label_moves.innerHTML = "Количество ходов: " + moves;
-    checkWin();
-}
-
-function swapBlocks(block, x1, y1, x2, y2) {
-    region[y2][x2] = region[y1][x1];
-    region[y1][x1] = 0;
-    block.block.style.left = `${20 + index * x2}px`;
-    block.block.style.top = `${20 + index * y2}px`;
-    block.ix = x2;
-    block.iy = y2;
-    moves++;
-}
-
-function checkWin() {
-    let win = true;
-    for (let i = 0; i < h; i++) {
-        for (let j = 0; j < w; j++) {
-            if (i === h - 1 && j === w - 1) {
-                continue;
-            }
-            if (region[i][j] !== i * w + j + 1) {
-                win = false;
-                break;
-            }
-        }
-    }
-    if (win) {
-        final = true;
-        document.getElementById("win-modal").style.display = "block";
-    }
-}

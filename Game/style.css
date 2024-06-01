@@ -6,6 +6,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    overflow: hidden;
 }
 
 .header {
@@ -21,17 +22,32 @@ h1 {
     margin: 0;
     text-align: center;
     flex-grow: 1;
+    padding-left: calc(100% - 77%);
 }
 
-.settings-btn {
+.settings-btn,
+.sound-btn {
     background: none;
     border: none;
     cursor: pointer;
 }
 
-.settings-btn img {
+.settings-btn img,
+.sound-btn img {
     width: 40px;
     height: 40px;
+}
+
+.restart-game {
+    padding: 10px 20px;
+    background: linear-gradient(90deg, #e29afe, #1603c7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 #moves-count {
@@ -43,6 +59,9 @@ h1 {
 
 .wrapper {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .game-board {
@@ -53,6 +72,8 @@ h1 {
     padding: 20px;
     border-radius: 10px;
     position: relative;
+    width: 400px; /* Ширина игрового поля */
+    height: 400px; /* Высота игрового поля */
 }
 
 .rect_block {
@@ -62,22 +83,10 @@ h1 {
     font-size: calc(16px + 1vw); /* Динамическое масштабирование размера шрифта */
     border: 2px solid #000000;
     cursor: pointer;
-    position: absolute;
+    position: relative;
     transition: left 0.5s, top 0.5s;
     background: radial-gradient(white, lightskyblue);
     border-radius: 10px;
-    width: calc(100% / 4 - 10px); /* Настройка ширины блока в зависимости от размера сетки */
-    height: calc(100% / 4 - 10px); /* Регулировка высоты блока в зависимости от размера сетки */
-}
-
-.restart-game {
-    padding: 10px 20px;
-    background: linear-gradient(90deg, #e29afe, #1603c7);
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    border-radius: 5px;
 }
 
 .modal {
@@ -117,6 +126,7 @@ h1 {
     text-decoration: none;
     cursor: pointer;
 }
+
 .close-modal {
     color: #aaa;
     float: right;

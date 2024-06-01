@@ -9,14 +9,20 @@
 <body>
 <div class="header">
     <h1>Пятнашки</h1>
+    <button id="sound-on-btn" class="sound-btn">
+        <img src="on-sound.jpg" alt="Включить звук">
+    </button>
+    <button id="sound-off-btn" class="sound-btn" style="display: none;">
+        <img src="off-sound.jpg" alt="Выключить звук">
+    </button>
     <button id="settings-btn" class="settings-btn">
         <img src="settings-icon.png" alt="Настройки">
     </button>
+    <button class="restart-game">Перезапустить игру</button>
 </div>
 <div id="moves-count">Количество ходов: 0</div>
 <div class="wrapper">
     <div id="game-board" class="game-board"></div>
-    <button class="restart-game">Перезапустить игру</button>
 </div>
 <div id="settings-modal" class="modal">
     <div class="modal-content">
@@ -27,6 +33,7 @@
             <option value="3">3x3</option>
             <option value="4" selected>4x4</option>
             <option value="5">5x5</option>
+            <option value="6">6x6</option>
         </select>
         <br><br>
         <label for="volume">Громкость музыки:</label>
@@ -34,6 +41,9 @@
         <br><br>
         <label for="transitions">Анимация передвижения:</label>
         <input type="checkbox" id="transitions" checked>
+        <br><br>
+        <label for="block-color">Цвет блоков:</label>
+        <input type="color" id="block-color" value="#87CEFA">
         <br><br>
         <label for="gradient1">Цвет градиента 1:</label>
         <input type="color" id="gradient1" value="#f4511e">
@@ -46,6 +56,8 @@
         <br><br>
         <label for="board-gradient2">Цвет градиента поля 2:</label>
         <input type="color" id="board-gradient2" value="#863a8b">
+        <br><br>
+        <button id="reset-settings">Сбросить по умолчанию</button>
     </div>
 </div>
 <div id="win-modal" class="modal">
@@ -58,6 +70,9 @@
 </div>
 <audio id="background-music" loop>
     <source src="background-music.mp3" type="audio/mpeg">
+</audio>
+<audio id="move-sound">
+    <source src="move-sound.mp3" type="audio/mpeg">
 </audio>
 <script src="scripts.js"></script>
 </body>
