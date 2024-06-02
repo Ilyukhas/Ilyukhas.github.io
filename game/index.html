@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пятнашки</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Пятнашки</h1>
+        <button id="sound-on-btn" class="sound-btn">
+            <img src="img/on-sound.png" alt="Включить звук">
+        </button>
+        <button id="sound-off-btn" class="sound-btn" style="display: none;">
+            <img src="img/off-sound.png" alt="Выключить звук">
+        </button>
+        <button id="settings-btn" class="settings-btn">
+            <img src="img/settings-icon.png" alt="Настройки">
+        </button>
+        <button class="restart-game">Перезапустить игру</button>
+    </div>
+    <div id="moves-count">Количество ходов: 0</div>
+    <div class="wrapper">
+        <div id="game-board" class="game-board"></div>
+    </div>
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <span id="close-modal" class="close">&times;</span>
+            <h2>Настройки</h2>
+            <label for="size">Размер поля:</label>
+            <select id="size">
+                <option value="3">3x3</option>
+                <option value="4" selected>4x4</option>
+                <option value="5">5x5</option>
+                <option value="6">6x6</option>
+            </select>
+            <br><br>
+            <label for="volume">Громкость музыки:</label>
+            <input type="range" id="volume" min="0" max="100" value="50">
+            <br><br>
+            <label for="block-color">Цвет блоков:</label>
+            <input type="color" id="block-color" value="#87CEFA">
+            <br><br>
+            <label for="gradient1">Цвет градиента 1:</label>
+            <input type="color" id="gradient1" value="#f4511e">
+            <br><br>
+            <label for="gradient2">Цвет градиента 2:</label>
+            <input type="color" id="gradient2" value="#511ff4">
+            <br><br>
+            <label for="board-gradient1">Цвет градиента поля 1:</label>
+            <input type="color" id="board-gradient1" value="#0a365e">
+            <br><br>
+            <label for="board-gradient2">Цвет градиента поля 2:</label>
+            <input type="color" id="board-gradient2" value="#863a8b">
+            <br><br>
+            <label for="font">Шрифт:</label>
+            <select id="font">
+                <option value="Arial" selected>Arial</option>
+                <option value="Verdana">Verdana</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Courier New">Courier New</option>
+            </select>
+            <br><br>
+            <label for="text-color">Цвет цифр на поле:</label>
+            <input type="color" id="text-color" value="#000000">
+            <br><br>
+            <button id="reset-settings">Сбросить по умолчанию</button>
+        </div>
+    </div>
+    <div id="win-modal" class="modal">
+        <div class="modal-content">
+            <span id="close-win-modal" class="close-modal">&times;</span>
+            <h2>Поздравляем!</h2>
+            <p>Вы собрали пятнашки!</p>
+            <button class="restart-game">Перезапустить игру</button>
+        </div>
+    </div>
+    <audio id="background-music" loop>
+        <source src="song/background-music.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="move-sound">
+        <source src="song/move-sound.mp3" type="audio/mpeg">
+    </audio>
+    <footer><p>⠀</p>
+    </footer>
+</div>
+<script src="js/scripts.js"></script>
+</body>
+</html>
