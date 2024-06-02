@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const modal = document.getElementById("settings-modal");
     const closeModal = document.getElementById("close-modal");
     const volumeSlider = document.getElementById("volume");
-    const transitionsCheckbox = document.getElementById("transitions");
     const sizeSelector = document.getElementById("size");
     const blockColorPicker = document.getElementById("block-color");
     const gradient1Picker = document.getElementById("gradient1");
@@ -19,18 +18,28 @@ document.addEventListener("DOMContentLoaded", function () {
     const movesCountElem = document.getElementById("moves-count");
     const winModal = document.getElementById("win-modal");
     const closeWinModal = document.getElementById("close-win-modal");
+    const fontSelector = document.getElementById("font");
+    const textColorPicker = document.getElementById("text-color");
 
     let movesCount = 0;
     let size = 4;
     let blockColor = blockColorPicker.value;
     let soundEnabled = true;
+    let font = fontSelector.value;
+    let textColor = textColorPicker.value;
 
     function initGame() {
         generateGameBoard(size);
         movesCount = 0;
         updateMovesCount();
+        const blocks = document.querySelectorAll(".rect_block");
+        blocks.forEach(block => {
+            block.style.transition = "none"; // Установлено на "none"
+            block.style.color = textColor; // Установлено цвет текста
+        });
         modal.style.display = "none";
         winModal.style.display = "none";
+        document.body.style.fontFamily = font;
     }
 
     function generateGameBoard(size) {
@@ -49,8 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 block.textContent = number;
                 block.style.background = blockColor;
                 block.addEventListener("click", () => moveBlock(block));
-            }
-            else {
+            } else {
                 block.classList.add("empty");
             }
             gameBoard.appendChild(block);
@@ -70,7 +78,6 @@ document.addEventListener("DOMContentLoaded", function () {
             (Math.abs(emptyCol - blockCol) === 1 && emptyRow === blockRow);
 
         if (isAdjacent) {
-            // Заменить пустой блок на выбранный блок и наоборот
             const temp = document.createElement("div");
             gameBoard.replaceChild(temp, block);
             gameBoard.replaceChild(block, emptyBlock);
@@ -80,7 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
             updateMovesCount();
 
             if (soundEnabled) {
-                moveSound.currentTime = 0; // Обнуляем время звука, чтобы он не прерывался при быстром нажатии
+                moveSound.currentTime = 0;
                 moveSound.play();
             }
 
@@ -134,13 +141,6 @@ document.addEventListener("DOMContentLoaded", function () {
         backgroundMusic.volume = volumeSlider.value / 100;
     });
 
-    transitionsCheckbox.addEventListener("change", () => {
-        const blocks = document.querySelectorAll(".rect_block");
-        blocks.forEach(block => {
-            block.style.transition = transitionsCheckbox.checked ? "left 0.5s, top 0.5s" : "none";
-        });
-    });
-
     sizeSelector.addEventListener("change", () => {
         size = parseInt(sizeSelector.value);
         initGame();
@@ -170,23 +170,45 @@ document.addEventListener("DOMContentLoaded", function () {
         gameBoard.style.background = `linear-gradient(65deg, ${boardGradient1Picker.value}, ${boardGradient2Picker.value})`;
     });
 
+    fontSelector.addEventListener("change", () => {
+        font = fontSelector.value;
+        document.body.style.fontFamily = font;
+    });
+
+    textColorPicker.addEventListener("input", () => {
+        textColor = textColorPicker.value;
+        const blocks = document.querySelectorAll(".rect_block");
+        blocks.forEach(block => {
+            block.style.color = textColor;
+        });
+    });
+
     resetSettingsBtn.addEventListener("click", () => {
         volumeSlider.value = 50;
         backgroundMusic.volume = 0.5;
-        transitionsCheckbox.checked = true;
         sizeSelector.value = 4;
         blockColorPicker.value = "#87CEFA";
         gradient1Picker.value = "#f4511e";
         gradient2Picker.value = "#511ff4";
         boardGradient1Picker.value = "#0a365e";
         boardGradient2Picker.value = "#863a8b";
+        fontSelector.value = "Arial";
+        textColorPicker.value = "#000000";
+
         document.body.style.background = `linear-gradient(65deg, ${gradient1Picker.value}, ${gradient2Picker.value})`;
         gameBoard.style.background = `linear-gradient(65deg, ${boardGradient1Picker.value}, ${boardGradient2Picker.value})`;
+        document.body.style.fontFamily = fontSelector.value;
+
         blockColor = blockColorPicker.value;
+        font = fontSelector.value;
+        textColor = textColorPicker.value;
+
         const blocks = document.querySelectorAll(".rect_block:not(.empty)");
         blocks.forEach(block => {
             block.style.backgroundColor = blockColor;
+            block.style.color = textColor;
         });
+
         initGame();
     });
 
